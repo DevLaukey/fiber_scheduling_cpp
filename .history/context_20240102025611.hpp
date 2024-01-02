@@ -1,0 +1,22 @@
+/*
+ * Author: Benedict R. Gaster
+ * Module: Advanced Systems Programming
+ *
+ * Derived from the excellent blog post: https://graphitemaster.github.io/fibers/
+ */
+#pragma once
+
+extern "C"
+{
+#include "context_asm.s" // Include your assembly code here
+}
+
+struct Context
+{
+    void *rip, *rsp;
+    void *rbx, *rbp, *r12, *r13, *r14, *r15;
+};
+
+extern "C" int get_context(Context *c);
+extern "C" void set_context(Context *c);
+extern "C" void swap_context(Context *out, Context *in);

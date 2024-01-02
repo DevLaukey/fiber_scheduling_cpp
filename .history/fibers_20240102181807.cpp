@@ -23,6 +23,8 @@ void goo()
 {
     std::cout << "You called goo" << std::endl;
 
+    // Switch back to foo
+    swap_context(&goo_context, &main_context);
 }
 
 int main()

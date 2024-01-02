@@ -10,6 +10,8 @@ void fiber()
     // Save the current context
     int z = get_context(&c);
 
+    std::cout << "z: " << z << std::endl;
+
     std::cout << "a message" << std::endl;
 
     if (x == 0)

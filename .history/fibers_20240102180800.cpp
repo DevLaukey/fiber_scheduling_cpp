@@ -5,7 +5,6 @@
 volatile bool x = false;
 
 Context main_context;
-Context goo_context;
 
 void goo(); // Forward declaration
 
@@ -13,16 +12,16 @@ void foo()
 {
     std::cout << "You called foo" << std::endl;
 
-    // Create a context for goo
-    get_context(&goo_context);
-    goo_context.rip = (void *)&goo; // Set rip to goo, so control will switch to goo
-    set_context(&goo_context);      // Transfer control to goo
+    // Create a context pointing to main
+    Context c;
+    get_context(&c);
+    c.rip = (void *)&goo;            // Set rip to goo, so control will switch to goo
+    swap_context(&main_context, &c); // Transfer control back to main context
 }
 
 void goo()
 {
     std::cout << "You called goo" << std::endl;
-
 }
 
 int main()
@@ -30,16 +29,16 @@ int main()
     // Print start of function
     std::cout << "Start of main" << std::endl;
 
-    // Allocate space for the main stack with additional 128 bytes for the Red Zone
+    // Allocate space for the stack with additional 128 bytes for the Red Zone
     char *data_main = new char[4096 + 128];
 
-    // Point the main stack pointer (sp_main) to the end of the allocated space
+    // Point the stack pointer (sp_main) to the end of the allocated space
     char *sp_main = data_main + 4096 + 128;
 
-    // Align the main stack to 16 bytes
+    // Align the stack to 16 bytes
     sp_main = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(sp_main) & -16L));
 
-    // Adjust the main stack pointer for the Red Zone
+    // Adjust the stack pointer for the Red Zone
     sp_main -= 128;
 
     // Set up main context

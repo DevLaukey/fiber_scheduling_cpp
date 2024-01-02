@@ -41,6 +41,8 @@ private:
 
 int main()
 {
+    // Print start of function
+    std::cout << "Start of main" << std::endl;
     // Create a fiber with the foo function
     Fiber f([]()
             { std::cout << "You called foo" << std::endl; });

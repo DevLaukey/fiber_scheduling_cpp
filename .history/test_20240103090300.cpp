@@ -1,6 +1,5 @@
 #include <iostream>
 #include "Scheduler.hpp"
-#include <functional> // Add this include for std::function
 
 void func1(Scheduler &s)
 {
@@ -18,14 +17,10 @@ int main()
 {
     Scheduler s;
 
-    // Use a lambda with explicit type for Fiber construction
-    auto lambda1 = [&s]()
-    { func1(s); };
-    auto lambda2 = [&s]()
-    { func2(s); };
-
-    Fiber f1(static_cast<std::function<void()>>(lambda1)); // Cast the lambda to std::function
-    Fiber f2(static_cast<std::function<void()>>(lambda2)); // Cast the lambda to std::function
+    Fiber f1([&]()
+             { func1(s); });
+    Fiber f2([&]()
+             { func2(s); });
 
     s.spawn(&f1);
     s.spawn(&f2);

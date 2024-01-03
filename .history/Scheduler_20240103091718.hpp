@@ -56,7 +56,6 @@ public:
     {
         return sharedData;
     }
-    
 };
 
 extern Scheduler s;

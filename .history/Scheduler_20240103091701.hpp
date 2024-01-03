@@ -52,11 +52,6 @@ public:
     {
         set_context(&context_);
     }
-    int *get_shared_data() const
-    {
-        return sharedData;
-    }
-    
 };
 
 extern Scheduler s;

@@ -56,7 +56,26 @@ public:
     {
         return sharedData;
     }
-    
+    void do_it()
+    {
+        if (!fibers_.empty())
+        {
+            Fiber *currentFiber = fibers_.front();
+            fibers_.pop_front();
+
+            set_context(&context_);
+
+            // Create a non-const copy of the context
+            Context fiberContext = currentFiber->get_context();
+
+            set_context(&fiberContext);
+
+            // Save the current fiber's context
+            currentFiber->set_context(context_);
+            // Resume the fiber
+            currentFiber->start_execution(*this);
+        }
+    }
 };
 
 extern Scheduler s;

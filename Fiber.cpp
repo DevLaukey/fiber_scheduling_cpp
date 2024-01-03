@@ -28,9 +28,9 @@ Fiber::~Fiber()
 
 // Member function definitions
 
-const Context &Fiber::get_context() const
+Context *get_context()
 {
-    return context;
+    return &context;
 }
 
 void Fiber::set_context(const Context &newContext)
@@ -45,7 +45,7 @@ void Fiber::swap_context(Fiber &other)
 
 void Fiber::start_execution(Fiber &other)
 {
-    swap_context(*this, other);
+    swap_context(other);
 }
 
 // Helper function to align the stack

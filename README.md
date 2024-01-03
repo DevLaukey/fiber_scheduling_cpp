@@ -12,6 +12,11 @@ This project demonstrates the implementation of fiber switching in C++ using a p
   - [Code Snippets](#code-snippets)
     - [`context.hpp`](#contexthpp)
   - [Output](#output)
+- [TASK2: Fiber Class](#task2-fiber-class)
+  - [Contents](#contents)
+  - [Features](#features)
+  - [Usage](#usage)
+  - [Implementation](#implementation)
 
 ## Introduction
 
@@ -95,3 +100,64 @@ Task 1
 ![Task 1 output](fiber.png)
 
 
+# TASK2: Fiber Class
+
+The `Fiber` class is a simple C++ implementation that provides a basic framework for creating and managing fibers. Fibers are lightweight threads of execution that can be cooperatively scheduled.
+
+## Contents
+
+
+- [Features](#features)
+- [Usage](#usage)
+- [Implementation](#implementation)
+
+
+
+
+
+## Features
+
+- **Fiber Creation:** Create fibers with a specified function to execute.
+- **Context Switching:** Swap the execution context between different fibers.
+- **Stack Management:** Allocate and deallocate stack space for each fiber.
+
+## Usage
+
+To use the `Fiber` class, follow these steps:
+
+1. Include the "Fiber.hpp" header file in your project.
+2. Create a `Fiber` object with the desired function.
+3. Use the provided functions to get, set, and swap the context of fibers.
+4. Start the execution of fibers to switch between them.
+
+```cpp
+#include "Fiber.hpp"
+#include <iostream>
+
+int main() {
+    // Example usage of the Fiber class
+    Fiber fooFiber(&fooFunction);
+    Fiber barFiber(&barFunction);
+
+    const Context &fooContext = fooFiber.get_context();
+    fooFiber.set_context(barFiber.get_context());
+
+    // Start the execution of fibers to switch between them
+    fooFiber.start_execution(barFiber);
+
+    return 0;
+}
+
+
+```
+
+## Implementation
+The Fiber class is implemented with the following key functions:
+
+- Fiber::Fiber(): Default constructor for initializing the fiber.
+- Fiber::Fiber(void (*function)()): Constructor for creating a fiber with a specified function.
+- Fiber::~Fiber(): Destructor for cleaning up resources, such as deallocating the stack.
+- Fiber::get_context(): Retrieve the context of the fiber.
+- Fiber::set_context(const Context &newContext): Set the context of the fiber.
+- Fiber::swap_context(Fiber &other): Swap the context between two fibers.
+- Fiber::start_execution(Fiber &other): Start the execution of the specified 

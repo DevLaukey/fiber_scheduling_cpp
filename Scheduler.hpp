@@ -1,23 +1,56 @@
-#ifndef SCHEDULER_HPP
-#define SCHEDULER_HPP
+#pragma once
 
-#include <iostream>
 #include <deque>
-#include "context.hpp"
 #include "Fiber.hpp"
 
 class Scheduler
 {
-public:
-    Scheduler() : context_(nullptr) {}
-
-    void spawn(Fiber *f);
-    void do_it();
-    void fiber_exit();
-
 private:
     std::deque<Fiber *> fibers_;
-    Context *context_;
+    Context context_;
+
+public:
+    Scheduler() {}
+
+    ~Scheduler()
+    {
+        for (auto fiber : fibers_)
+        {
+            delete fiber;
+        }
+    }
+
+    void spawn(Fiber *f)
+    {
+        fibers_.push_back(f);
+    }
+
+     void do_it()
+    {
+        if (fibers_.empty())
+        {
+            return;
+        }
+
+        get_context(&context_);
+
+        while (!fibers_.empty())
+        {
+            Fiber *currentFiber = fibers_.front();
+            fibers_.pop_front();
+
+            set_context(&context_);
+
+            // Create a non-const copy of the context
+            Context fiberContext = currentFiber->get_context();
+
+            set_context(&fiberContext);
+        }
+    }
+    void fiber_exit()
+    {
+        set_context(&context_);
+    }
 };
 
-#endif // SCHEDULER_HPP
+extern Scheduler s;

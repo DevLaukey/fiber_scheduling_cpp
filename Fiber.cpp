@@ -1,83 +1,55 @@
+#include "Fiber.hpp"
 #include <iostream>
-#include <cstdint>
-#include "context.hpp"
 
-class Fiber
+// Constructor definitions
+Fiber::Fiber() : stack_bottom(nullptr), stack_top(nullptr)
 {
-public:
-    Fiber(void (*func)()) : function(func) {}
-
-    void execute()
-    {
-        get_context(&context);
-        function();
-        // You can add additional cleanup or handling here if needed
-    }
-
-    Context getContext()
-    {
-        return context;
-    }
-
-private:
-    Context context;
-    void (*function)();
-};
-
-volatile bool x = false;
-
-Context main_context;
-
-void foo(); // Declare the foo function
-
-Fiber fooFiber(&foo);
-
-void foo()
-{
-    std::cout << "You called foo" << std::endl;
-
-    // Store the context in a variable
-    Context fooContext = fooFiber.getContext();
-
-    // Transfer control back to main using the saved context
-    swap_context(&fooContext, &main_context);
+    context.rsp = context.rbx = context.rbp = context.r12 = context.r13 = context.r14 = context.r15 = nullptr;
+    context.rip = nullptr;
 }
 
-int main()
+Fiber::Fiber(void (*function)()) : Fiber()
 {
-    // Print start of function
-    std::cout << "Start of main" << std::endl;
+    const int stack_size = 4096 + 128;
+    stack_bottom = new char[stack_size];
+    stack_top = stack_bottom + stack_size;
+    stack_top = align_stack(stack_top);
+    stack_top -= 128;
 
-    // Allocate space for the main stack with additional 128 bytes for the Red Zone
-    char *data_main = new char[4096 + 128];
+    context.rsp = stack_top;
+    context.rip = reinterpret_cast<void *>(function);
+}
 
-    // Point the main stack pointer (sp_main) to the end of the allocated space
-    char *sp_main = data_main + 4096 + 128;
+// Destructor definition
+Fiber::~Fiber()
+{
+    delete[] stack_bottom;
+}
 
-    // Align the main stack to 16 bytes
-    sp_main = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(sp_main) & -16L));
+// Member function definitions
 
-    // Adjust the main stack pointer for the Red Zone
-    sp_main -= 128;
+const Context &Fiber::get_context() const
+{
+    return context;
+}
 
-    // Set up main context
-    get_context(&main_context);
-    main_context.rip = nullptr; // Set to nullptr initially
-    main_context.rsp = sp_main;
+void Fiber::set_context(const Context &newContext)
+{
+    context = newContext;
+}
 
-    // Create a fiber for foo
-    fooFiber.execute();
+void Fiber::swap_context(Fiber &other)
+{
+    std::swap(context, other.context);
+}
 
-    // Control will be transferred to foo
-    // Once foo completes, it will return to set_context, and set_context will set the context back to main
-    // Due to the volatile keyword on x, the compiler will not optimize the condition
-    if (x)
-    {
-        std::cout << "Back in main after foo" << std::endl;
-    }
+void Fiber::start_execution(Fiber &other)
+{
+    swap_context(*this, other);
+}
 
-    // Deallocate the main stack
-    delete[] data_main;
-
-    return 0;
+// Helper function to align the stack
+char *Fiber::align_stack(char *stackPointer)
+{
+    return reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(stackPointer) & -16L));
 }

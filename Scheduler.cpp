@@ -1,6 +1,7 @@
 #include <iostream>
 #include <deque>
 #include "context.hpp"
+#include "Fiber.hpp"
 
 class Scheduler
 {
@@ -16,7 +17,8 @@ public:
     {
         while (!fibers_.empty())
         {
-            get_context(&context_);
+            // Pass the pointer itself, not the address of the pointer
+            get_context(context_);
 
             if (!fibers_.empty())
             {
@@ -38,18 +40,18 @@ private:
     Context *context_;
 };
 
-// Example usage:
+
+void foo(); // Forward declaration of the 'foo' function
+
 int main()
 {
     Scheduler scheduler;
 
     // Creating fibers
     Fiber fooFiber(&foo);
-    Fiber gooFiber(&goo);
 
     // Spawning fibers
     scheduler.spawn(&fooFiber);
-    scheduler.spawn(&gooFiber);
 
     // Running the scheduler
     scheduler.do_it();
